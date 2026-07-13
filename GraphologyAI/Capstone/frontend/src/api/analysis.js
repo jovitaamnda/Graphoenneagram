@@ -1,12 +1,12 @@
 import client from "./client";
 
 export const analysisApi = {
-    uploadImage: async (imageData) => {
-        return client.post("/api/analysis/upload", { imageData });
+    uploadImage: async (userId, imageData) => {
+        return client.post("/api/analysis/upload", { userId, imageData });
     },
 
-    uploadCanvas: async (canvasData) => {
-        return client.post("/api/analysis/canvas", { canvasData });
+    uploadCanvas: async (userId, canvasData) => {
+        return client.post("/api/analysis/canvas", { userId, canvasData });
     },
 
     getHistory: async (userId, page = 1, limit = 10) => {
@@ -18,9 +18,4 @@ export const analysisApi = {
     getDetail: async (analysisId) => {
         return client.get(`/api/analysis/${analysisId}`);
     },
-
-    saveValidationResult: async (analysisId, payload) => {
-        return client.put(`/api/analysis/${analysisId}/validation`, payload);
-    },
 };
-

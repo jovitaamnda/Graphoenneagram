@@ -1,308 +1,158 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { Sparkles, Upload, PenTool, Brain, Zap, Shield, ArrowRight, Star, Globe } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { FileText, Cpu, ClipboardCheck, FileOutput, MapPin, Heart, Lightbulb, Zap } from "lucide-react";
-
-const NAV_SECTIONS = [
-  { label: "Ilmu Grafologi", desc: "Analisis psikologis mendalam melalui struktur goresan dan spasi tulisan tangan." },
-  { label: "Panduan Pengguna", desc: "Cara menggunakan Grafologi untuk mendapatkan profil diri yang paling akurat." },
-  { label: "Sistem Enneagram", desc: "Sembilan tipe kepribadian yang memetakan motivasi dan ketakutan terdalam kita." },
-];
-
-const TRIAD_ITEMS = [
-  {
-    icon: Heart,
-    title1: "Pusat Jantung",
-    title2: "(Heart)",
-    types: "Tipe 2, 3, 4.",
-    desc: "Fokus pada citra diri dan perasaan.",
-    subtypes: [
-      "Tipe 2: Sang Penolong",
-      "Tipe 3: Sang Penyelesai",
-      "Tipe 4: Sang Individualis",
-    ],
-    topBorder: "border-[#7A3B2E]",
-    iconBg: "bg-[#EFE8E6]",
-    iconColor: "text-[#7A3B2E]",
-  },
-  {
-    icon: Lightbulb,
-    title1: "Pusat Kepala",
-    title2: "(Head)",
-    types: "Tipe 5, 6, 7.",
-    desc: "Fokus pada logika dan keamanan.",
-    subtypes: [
-      "Tipe 5: Sang Penyelidik",
-      "Tipe 6: Sang Loyalis",
-      "Tipe 7: Sang Penggemar",
-    ],
-    topBorder: "border-[#D9C8B5]",
-    iconBg: "bg-[#F2ECE7]",
-    iconColor: "text-[#9C8C7D]",
-  },
-  {
-    icon: Zap,
-    title1: "Pusat Insting",
-    title2: "(Gut)",
-    types: "Tipe 8, 9, 1.",
-    desc: "Fokus pada kontrol dan otonomi.",
-    subtypes: [
-      "Tipe 8: Sang Penantang",
-      "Tipe 9: Sang Pendamai",
-      "Tipe 1: Sang Reformis",
-    ],
-    topBorder: "border-[#725C47]",
-    iconBg: "bg-[#FDF6ED]",
-    iconColor: "text-[#725C47]",
-  },
-];
-
-const STEPS = [
-  {
-    icon: FileText,
-    number: "01",
-    label: "LANGKAH 01",
-    title: "Unggah Tulisan",
-    desc: "Foto dan unggah tulisan tangan Anda di atas kertas putih polos.",
-  },
-  {
-    icon: Cpu,
-    number: "02",
-    label: "LANGKAH 02",
-    title: "Proses AI",
-    desc: "Algoritma kami menganalisis lebih dari 10 parameter grafologi secara terinci.",
-  },
-  {
-    icon: ClipboardCheck,
-    number: "03",
-    label: "LANGKAH 03",
-    title: "Validasi Diri",
-    desc: "Jawab beberapa pertanyaan untuk menyempurnakan hasil dengan refleksi Anda.",
-  },
-  {
-    icon: FileOutput,
-    number: "04",
-    label: "LANGKAH 04",
-    title: "Hasil Akhir",
-    desc: "Terima laporan PDF komprehensif tentang pola dan kepribadian Anda.",
-    accent: true,
-  },
-];
 
 export default function LearnMore() {
+  const features = [
+    { icon: Zap, title: "Analisis Instan", desc: "Hasil kepribadian dalam hitungan detik" },
+    { icon: Upload, title: "Upload Foto", desc: "Unggah tulisan tangan dari galeri" },
+    { icon: PenTool, title: "Tulis Langsung", desc: "Gunakan canvas digital interaktif" },
+    { icon: Brain, title: "AI Graphology", desc: "Didukung teknologi AI terdepan" },
+    { icon: Shield, title: "100% Aman", desc: "Data pribadi terenkripsi & terlindungi" },
+    { icon: Globe, title: "Akses Dimana Saja", desc: "Bisa diakses dari HP, tablet, atau laptop" },
+  ];
+
+  const steps = [
+    { num: "01", title: "Daftar / Login", desc: "Buat akun dalam 30 detik" },
+    { num: "02", title: "Pilih Metode", desc: "Upload foto atau tulis langsung" },
+    { num: "03", title: "Tunggu Sebentar", desc: "AI menganalisis tulisan Anda" },
+    { num: "04", title: "Lihat Hasil", desc: "Dapatkan laporan kepribadian lengkap!" },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#FBF5F0] font-serif">
-
-      {/* ── HERO ── */}
-      <section className="relative w-full" style={{ minHeight: "400px" }}>
-        {/* Full-bleed background image */}
-        <div className="relative w-full" style={{ height: "400px" }}>
-          <Image
-            src="/handwriting_hero.png"
-            alt="Handwriting background"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="100vw"
-          />
-          {/* Light overlay to match reference image */}
-          <div className="absolute inset-0 bg-[#FBF5F0]/85" />
-
-          {/* Centered text on top of image */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pt-12">
-            <h1 className="text-5xl md:text-6xl font-bold text-[#7A3B2E] leading-tight mb-4 tracking-tight">
-              Pelajari Lebih Lanjut
-            </h1>
-            <p className="text-lg md:text-xl font-medium text-[#5C3D2A] max-w-3xl leading-relaxed mb-6">
-              Selamat datang di rumah bagi ilmu pengetahuan tentang penemuan jati diri.<br />
-              Pelajari bagaimana setiap goresan tinta mengungkap kedalaman jiwa manusia.
-            </p>
-            <Link href="/user/analysis">
-              <button className="inline-flex items-center gap-2 bg-[#7A3B2E] hover:bg-[#6A2E22] text-white font-medium px-6 py-2.5 rounded-md transition-all duration-300 shadow-sm text-base">
-                Mulai Belajar ↓
-              </button>
-            </Link>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-700 to-pink-600 text-white py-24">
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-indigo-500 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-pink-500 rounded-full blur-3xl opacity-30 animate-pulse delay-1000"></div>
         </div>
 
-        {/* Three Category Cards strip — sits just below the image */}
-        <div className="bg-[#FBF5F0] px-6 py-12">
-          <div className="max-w-5xl mx-auto grid gap-6 md:grid-cols-3">
-            {NAV_SECTIONS.map((s, i) => (
-              <div key={i} className="flex flex-col gap-2 p-6 bg-[#FCF1E6] rounded-xl shadow-md border border-[#F2E0D1] transform transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-                <h3 className="font-extrabold text-[#95544C] text-xl md:text-2xl">{s.label}</h3>
-                <p className="text-sm md:text-base font-medium text-[#7C5A4C] leading-relaxed">{s.desc}</p>
-              </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            <h1 className="text-5xl md:text-7xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-200 to-pink-200">Grapholyze AI</h1>
+            <p className="text-2xl md:text-4xl font-bold mb-6">Ungkap Rahasia Kepribadian dari Tulisan Tangan</p>
+            <p className="text-lg md:text-xl text-indigo-100 max-w-3xl mx-auto">Teknologi AI terdepan yang menganalisis goresan pena Anda untuk mengungkap karakter, emosi, dan potensi tersembunyi.</p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.h2 initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-4xl md:text-5xl font-black text-center mb-16 text-gray-800">
+            Mengapa Grapholyze?
+          </motion.h2>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -10 }}
+                className="bg-white rounded-3xl shadow-xl p-8 text-center border border-indigo-100 hover:border-purple-300 transition-all"
+              >
+                <div className="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <feature.icon className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── GORESAN TINTA & PSIKOLOGI ── */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <div className="rounded-[2rem] overflow-hidden border border-[#EDD9CC] bg-white shadow-sm grid md:grid-cols-2 items-stretch">
-          
-          {/* Left: Text */}
-          <div className="p-10 flex flex-col justify-between">
-            <div>
-              <h2 className="text-3xl font-bold text-[#2C1B0E] mb-4 leading-snug">
-                Goresan Tinta &<br />Psikologi
-              </h2>
-              <p className="text-[#5C3D2A] text-base md:text-lg font-medium leading-relaxed mb-8">
-                Grafologi bukanlah sekadar ramalan.
-                Ini adalah studi tentang bagaimana
-                impuls motorik dari otak tercermin
-                dalam gerakan tangan. Setiap
-                kemiringan, tekanan, dan bentuk
-                huruf membawa kode psikologis
-                tentang emosi dan temperamen
-                Anda.
-              </p>
-            </div>
+      {/* How It Works */}
+      <section className="py-20 bg-gradient-to-r from-indigo-700 via-purple-700 to-pink-600 text-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.h2 initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-4xl md:text-5xl font-black text-center mb-16">
+            Cara Kerja Grapholyze
+          </motion.h2>
 
-            {/* Two Feature Chips */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl bg-[#F9F0E8] border border-[#EDD9CC] p-5 shadow-sm">
-                <p className="text-sm font-bold text-[#7A3B2E] uppercase tracking-widest mb-2">Tekanan Kuat</p>
-                <p className="text-sm font-medium text-[#5C3D2A] leading-relaxed">Mencerminkan vitalitas dan ketegasan emosional yang tinggi.</p>
-              </div>
-              <div className="rounded-xl bg-[#F9F0E8] border border-[#EDD9CC] p-5 shadow-sm">
-                <p className="text-sm font-bold text-[#7A3B2E] uppercase tracking-widest mb-2">Kemiringan Kanan</p>
-                <p className="text-sm font-medium text-[#5C3D2A] leading-relaxed">Menunjukkan ekspresi emosional yang terbuka dan sosial.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Image */}
-          <div className="relative min-h-[320px] md:min-h-0">
-            <Image
-              src="/handwriting_hero.png"
-              alt="Handwriting close up"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-            {/* Warm color overlay */}
-            <div className="absolute inset-0 bg-[#A0522D]/10" />
+          <div className="grid md:grid-cols-4 gap-8">
+            {steps.map((step, i) => (
+              <motion.div key={i} initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.2 }} className="text-center">
+                <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-6 text-4xl font-black border-4 border-white/30">{step.num}</div>
+                <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
+                <p className="text-indigo-100">{step.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── PANDUAN ENNEAGRAM ── */}
-      <section className="bg-[#FBF5F0] py-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-[2.75rem] font-bold italic text-[#7A3B2E] mb-4">
-              Panduan Enneagram: Sembilan Arketipe
-            </h2>
-            <p className="text-[#5C3D2A] max-w-3xl mx-auto text-lg leading-relaxed font-medium">
-              Sistem Enneagram memetakan sembilan cara berbeda dalam memandang dunia dan
-              merespons tantangan hidup melalui tiga pusat kecerdasan.
-            </p>
-          </div>
+      {/* Highlight Benefits */}
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-12 text-white">
+            <h2 className="text-4xl md:text-5xl font-black mb-8">Siap Mengungkap Diri Anda?</h2>
+            <p className="text-xl mb-10 opacity-90">Lebih dari 10.000+ orang telah menemukan kepribadian sejati mereka melalui Grapholyze AI</p>
+            <div className="flex items-center justify-center gap-4 mb-10">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-10 h-10 fill-yellow-300 text-yellow-300" />
+              ))}
+              <span className="text-2xl font-bold">4.9/5 dari pengguna</span>
+            </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {TRIAD_ITEMS.map((triad, i) => {
-              const Icon = triad.icon;
-              return (
-                <div key={i} className={`bg-white rounded-lg p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border-t-[6px] ${triad.topBorder}`}>
-                  <div className={`w-10 h-10 flex items-center justify-center rounded-lg mb-6 ${triad.iconBg}`}>
-                    <Icon size={18} className={triad.iconColor} />
-                  </div>
-                  <h3 className="font-extrabold text-[#7A3B2E] text-2xl md:text-[1.7rem] leading-snug mb-5">
-                    {triad.title1}<br />
-                    {triad.title2}
-                  </h3>
-                  <p className="text-base font-bold text-[#5C3D2A] mb-1">{triad.types}</p>
-                  <p className="text-base font-medium text-[#5C3D2A] mb-6 leading-relaxed">{triad.desc}</p>
-                  <div className="space-y-3 mt-4">
-                    {triad.subtypes.map((sub, j) => (
-                      <p key={j} className="text-[15px] md:text-base text-[#2C1B0E] font-bold">
-                        {sub}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PANDUAN PENGGUNA LANGKAH DEMI LANGKAH ── */}
-      <section className="py-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#2C1B0E] mb-4">
-              Panduan Pengguna: Langkah Demi Langkah
-            </h2>
-            <p className="text-[#5C3D2A]">
-              Proses sederhana untuk mendapatkan hasil analisis yang paling komprehensif.
-            </p>
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
-            {STEPS.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <div
-                  key={i}
-                  className={`rounded-2xl p-7 border flex flex-col gap-4 ${
-                    step.accent
-                      ? "bg-[#7A3B2E] border-[#7A3B2E] text-white shadow-lg"
-                      : "bg-white border-[#EDD9CC] text-[#2C1B0E] shadow-sm hover:shadow-md"
-                  } transition-shadow`}
-                >
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                    step.accent ? "bg-white/20" : "bg-[#F9F0E8]"
-                  }`}>
-                    <Icon size={22} className={step.accent ? "text-white" : "text-[#7A3B2E]"} />
-                  </div>
-                  <div>
-                    <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${
-                      step.accent ? "text-white/80" : "text-[#A07060]"
-                    }`}>{step.label}</p>
-                    <h4 className={`font-extrabold text-lg md:text-xl mb-3 ${step.accent ? "text-white" : "text-[#2C1B0E]"}`}>
-                      {step.title}
-                    </h4>
-                    <p className={`text-sm md:text-base font-medium leading-relaxed ${step.accent ? "text-white/90" : "text-[#5C3D2A]"}`}>
-                      {step.desc}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* CTA */}
-          <div className="mt-16 text-center">
-            <Link href="/user/analysis">
-              <button className="inline-flex items-center gap-2 bg-[#7A3B2E] hover:bg-[#6A2E22] text-white font-semibold px-10 py-4 rounded-full transition-all duration-300 shadow-md hover:shadow-lg text-base">
-                Mulai Analisis Sekarang →
-              </button>
+            <Link href="/homeanalisis">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white text-indigo-700 font-black text-2xl px-12 py-6 rounded-2xl shadow-2xl hover:shadow-indigo-500/50 flex items-center gap-4 mx-auto group"
+              >
+                Mulai Analisis Sekarang
+                <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition" />
+              </motion.button>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="border-t border-[#EDD9CC] py-8 px-6 text-sm text-[#8A6050]">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-16 px-6">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-10">
           <div>
-            <span className="font-semibold text-[#7A3B2E]">Grafologi</span>
-            <span className="ml-2">© 2026</span>
+            <h3 className="text-3xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">Grapholyze</h3>
+            <p className="text-gray-400">
+              Capstone Project 2025
+              <br />
+              oleh <span className="text-purple-400 font-bold">Aisyah, Jovita, Putri, Rhena </span>
+            </p>
           </div>
-          <div className="flex gap-6">
-            {["Tentang", "Privasi", "Bantuan", "Ketentuan"].map((link) => (
-              <a key={link} href="#" className="hover:text-[#7A3B2E] transition-colors">
-                {link}
-              </a>
-            ))}
+
+          <div>
+            <h4 className="font-bold text-lg mb-4">Fitur</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li>Handwriting Analysis</li>
+              <li>Personality Insights</li>
+              <li>Real-time AI Processing</li>
+              <li>Secure & Private</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-lg mb-4">Teknologi</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li>Next.js 14</li>
+              <li>Tailwind CSS</li>
+              <li>TensorFlow.js</li>
+              <li>Framer Motion</li>
+            </ul>
+          </div>
+
+          <div className="text-center md:text-right">
+            <p className="text-3xl font-bold text-purple-400 mb-4">10.000+</p>
+            <p className="text-gray-400">Pengguna Puas</p>
           </div>
         </div>
-      </footer>
 
+        <div className="text-center mt-12 text-gray-500">© 2025 Grapholyze AI • Dibuat dengan cinta oleh Jovita</div>
+      </footer>
     </div>
   );
 }

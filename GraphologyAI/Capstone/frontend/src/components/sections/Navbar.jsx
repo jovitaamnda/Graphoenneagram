@@ -1,36 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import LoginRequiredModal from "@/components/modals/LoginRequiredModal";
-import { User, LayoutDashboard, LogOut, ShieldCheck } from "lucide-react";
 
 export default function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("/profile.jpeg");
-  const [isClient, setIsClient] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
   const profileRef = useRef(null);
   const { user, logout } = useAuth();
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   // update avatar
   useEffect(() => {
-    if (user?.profilePicture) {
-      const imageUrl = user.profilePicture.startsWith('http')
-        ? user.profilePicture
-        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${user.profilePicture}`;
-      setImgSrc(imageUrl);
-    } else {
-      setImgSrc("/profile.jpeg");
-    }
+    if (user?.photo) setImgSrc(user.photo);
+    else setImgSrc("/profile.jpeg");
   }, [user]);
 
   // close dropdown
@@ -51,141 +39,80 @@ export default function Navbar() {
 
   const handleScrollOrNavigate = (page) => {
     if (page === "home") {
-      router.push(user ? "/user/dashboard" : "/");
+      router.push("/");
     } else if (page === "handwriting") {
-      if (user) {
-        router.push("/user/analysis");
-      } else {
-        setShowLoginModal(true);
-      }
-    } else if (page === "learn") {
-      if (user) {
-        router.push("/learn-more");
-      } else {
-        setShowLoginModal(true);
-      }
-    } else if (page === "profile") {
-      router.push("/user/profile");
+      router.push("/user/homeanalisis");
+    } else if (page === "about") {
+      router.push("/about");
     } else if (page === "login") {
       router.push("/auth/login");
     }
+    setMobileOpen(false);
   };
 
-  // Hide Navbar on Admin pages (admin has its own navbar)
-  if (pathname.startsWith("/admin")) return null;
-
-  // Prevent hydration mismatch by rendering only on the client
-  if (!isClient) return null;
-
-  const navItems = [
-    { label: "Beranda", page: "home" },
-    { label: "Analisis Tulisan Tangan", page: "handwriting" },
-    { label: "Pelajari Lebih Lanjut", page: "learn" },
-    ...(user ? [{ label: "Akun", page: "profile" }] : []),
-  ];
-
   return (
-    <>
-    <nav className="fixed top-0 w-full z-50 bg-[#FFF8F4]/95 backdrop-blur-md border-b border-[#DBC9C4]/40 transition-all duration-300" suppressHydrationWarning>
-      <div className="max-w-full mx-auto px-8 py-6 flex items-center justify-between" suppressHydrationWarning>
+    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-md transition-all duration-300" suppressHydrationWarning>
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center" suppressHydrationWarning>
         <div onClick={() => handleScrollOrNavigate("home")} className="cursor-pointer hover:opacity-80 transition-opacity">
-          <span className="text-2xl font-semibold tracking-[0.12em] text-[#854C4A]">Grafologi</span>
+          <Image
+            src="/grapholyze_logo.png"
+            alt="Grapholyze Capstone Logo"
+            width={240}
+            height={60}
+            className="w-auto h-14 object-contain"
+            priority
+          />
         </div>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-12">
-          {navItems.map((item) => {
-            const active = (item.page === "home" && (pathname === "/" || pathname === "/user/dashboard")) ||
-              (item.page === "handwriting" && pathname === "/user/analysis") ||
-              (item.page === "learn" && pathname === "/learn-more") ||
-              (item.page === "profile" && pathname === "/user/profile");
+        <div className="hidden md:flex items-center gap-8">
+          <button onClick={() => handleScrollOrNavigate("home")} className="text-gray-700 font-medium hover:text-[#1e3a8a] transition-colors relative group">
+            Home
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#1e3a8a] transition-all group-hover:w-full"></span>
+          </button>
+          <button onClick={() => handleScrollOrNavigate("handwriting")} className="text-gray-700 font-medium hover:text-[#1e3a8a] transition-colors relative group">
+            Handwriting Analyst
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#1e3a8a] transition-all group-hover:w-full"></span>
+          </button>
+          <button onClick={() => handleScrollOrNavigate("about")} className="text-gray-700 font-medium hover:text-[#1e3a8a] transition-colors relative group">
+            About
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#1e3a8a] transition-all group-hover:w-full"></span>
+          </button>
 
-            return (
-              <button
-                key={item.page}
-                onClick={() => handleScrollOrNavigate(item.page)}
-                className={`relative text-base font-semibold transition-colors ${active ? "text-[#854C4A]" : "text-[#524342] hover:text-[#854C4A]"}`}
-              >
-                {item.label}
-                {active && <span className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-[#854C4A]" />}
+          {!user ? (
+            <button onClick={() => router.push("/auth/login")} className="bg-[#1e3a8a] text-white px-6 py-2.5 rounded-full font-medium hover:bg-blue-900 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              Login/Register
+            </button>
+          ) : (
+            <div ref={profileRef} className="relative">
+              <button onClick={() => setProfileOpen((v) => !v)} className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-[#1e3a8a] transition-colors">
+                <Image src={imgSrc} alt="avatar" width={40} height={40} />
               </button>
-            );
-          })}
 
-          {isClient && (
-            !user ? (
-              /* ── Tamu: tampilkan "Login" sebagai teks nav ── */
-              <button
-                onClick={() => router.push("/auth/login")}
-                className="relative text-base font-semibold text-[#524342] hover:text-[#854C4A] transition-colors"
-              >
-                Login
-              </button>
-            ) : (
-              /* ── User login: dropdown Akun ── */
-              <div ref={profileRef} className="relative">
-                <button
-                  onClick={() => setProfileOpen((v) => !v)}
-                  className="w-10 h-10 rounded-full border border-[#DBC9C4] flex items-center justify-center text-[#854C4A] hover:bg-[#854C4A]/5 transition-all"
-                >
-                  <User className="w-5 h-5 text-[#524342]" />
-                </button>
-
-                {profileOpen && (
-                  <div className="absolute right-0 mt-3 w-64 bg-white shadow-xl rounded-2xl border border-[#E7D7D1] font-sans overflow-hidden transform origin-top-right transition-all">
-                    <div className="px-5 py-4 border-b border-[#E7D7D1] bg-[#FFFBF9]">
-                      <div className="font-bold text-[#221A13] text-base mb-0.5">{user.name || "User"}</div>
-                      <div className="text-sm font-medium text-[#854C4A] truncate">{user.email}</div>
-                    </div>
-                    
-                    <div className="p-2 space-y-1">
-                      {user.role === "admin" && (
-                        <button
-                          onClick={() => router.push("/admin")}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm text-[#854C4A] font-bold rounded-xl hover:bg-[#FFF8F4] transition-colors"
-                        >
-                          <ShieldCheck size={18} />
-                          Admin Dashboard
-                        </button>
-                      )}
-                      <button
-                        onClick={() => router.push("/user/dashboard")}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm text-[#524342] font-semibold rounded-xl hover:bg-[#FFF8F4] transition-colors"
-                      >
-                        <LayoutDashboard size={18} />
-                        Dashboard Utama
-                      </button>
-                      <button
-                        onClick={() => router.push("/user/profile")}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm text-[#524342] font-semibold rounded-xl hover:bg-[#FFF8F4] transition-colors"
-                      >
-                        <User size={18} />
-                        Pengaturan Profil
-                      </button>
-                    </div>
-
-                    <div className="p-2 border-t border-[#E7D7D1]">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm font-bold text-[#C15454] rounded-xl hover:bg-[#FFF2F2] transition-colors"
-                      >
-                        <LogOut size={18} />
-                        Keluar Akun
-                      </button>
-                    </div>
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white shadow-xl rounded-xl border border-gray-100 overflow-hidden animate-fade-in-down">
+                  <div className="px-4 py-3 border-b bg-gray-50/50">
+                    <div className="font-semibold text-gray-800">{user.name || "User"}</div>
+                    <div className="text-xs text-gray-500">{user.email}</div>
+                    <div className="text-xs text-[#1e3a8a] mt-1 font-medium bg-blue-50 inline-block px-1.5 py-0.5 rounded">Role: {user.role || "user"}</div>
                   </div>
-                )}
-              </div>
-            )
+                  {user.role === "admin" && (
+                    <button onClick={() => router.push("/admin/admin")} className="block w-full px-4 py-2 text-left hover:bg-gray-50 font-medium text-purple-600 transition-colors">
+                      📊 Admin Dashboard
+                    </button>
+                  )}
+                  <button onClick={() => router.push("/profile")} className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-700 transition-colors">
+                    👤 Profile
+                  </button>
+                  <button onClick={handleLogout} className="block w-full px-4 py-2 text-left text-red-500 hover:bg-red-50 transition-colors">
+                    🚪 Logout
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
     </nav>
-
-    <LoginRequiredModal
-      isOpen={showLoginModal}
-      onClose={() => setShowLoginModal(false)}
-    />
-  </>
   );
 }

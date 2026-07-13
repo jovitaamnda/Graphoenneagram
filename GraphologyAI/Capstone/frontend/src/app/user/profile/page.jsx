@@ -1,195 +1,133 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { authApi } from "@/api";
-import { Camera } from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, loading, logout, updateUser } = useAuth();
+  const { user, login, logout, loading: authLoading } = useAuth();
+  const [loading, setLoading] = useState(true);
 
-  // Form State
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    age: "",
-    gender: ""
-  });
-
-  const [initialLoading, setInitialLoading] = useState(true);
+  // form state
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
-  const [file, setFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(null);
 
-  const fileInputRef = useRef(null);
-
-  // Protected Route Check
   useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      router.push("/auth/login");
-    }
-  }, [user, loading, router]);
-
-  // Fetch Data on Load
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchProfile = async () => {
-      try {
-        const data = await authApi.getProfile();
-        setFormData({
-          name: data.name || "",
-          email: data.email || "",
-          age: data.profile?.age || "",
-          gender: data.profile?.gender || ""
-        });
-
-        if (data.profilePicture) {
-          const url = data.profilePicture.startsWith('http')
-            ? data.profilePicture
-            : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${data.profilePicture}`;
-          setAvatarPreview(url);
-        }
-      } catch (error) {
-        console.error("Failed to load profile:", error);
-      } finally {
-        setInitialLoading(false);
+    if (!authLoading) {
+      if (!user) {
+        router.push("/auth/login");
+      } else {
+        fetchProfile();
       }
-    };
-    fetchProfile();
-  }, [user]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const reader = new FileReader();
-      reader.onloadend = () => setAvatarPreview(reader.result);
-      reader.readAsDataURL(selectedFile);
     }
-  };
+  }, [user, authLoading, router]);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-
+  const fetchProfile = async () => {
     try {
-      const dataToSubmit = new FormData();
-      dataToSubmit.append('name', formData.name);
-      dataToSubmit.append('email', formData.email);
-      dataToSubmit.append('age', formData.age);
-      dataToSubmit.append('gender', formData.gender);
-      if (file) {
-        dataToSubmit.append('profilePicture', file);
-      }
-
-      // Update Profile
-      const updatedUser = await authApi.updateProfile(dataToSubmit);
-
-      if (updateUser) updateUser(updatedUser);
-
-      alert("Profil berhasil diperbarui!");
-
-    } catch (error) {
-      console.error("Update failed:", error);
-      alert(error.response?.data?.message || "Gagal menyimpan profil.");
+      const data = await authApi.getProfile();
+      setName(data.name || "");
+      setEmail(data.email || "");
+      setPhone(data.phone || "");
+    } catch (err) {
+      console.error(err);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     logout();
-    router.push("/auth/login");
+    router.push("/");
   };
 
-  if (loading || initialLoading) {
-    return (
-      <div className="min-h-screen bg-[#FFF8F4] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#E7D7D1] border-t-[#854C4A] rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await authApi.updateProfile({ name, phone });
+      alert("Profil berhasil disimpan.");
+      // update user in context
+      login({ ...user, name });
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan saat menyimpan profil.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  if (!user) return null;
+  if (authLoading || loading) return <div className="min-h-screen flex items-center justify-center bg-[#FFF8F4]">Loading...</div>;
+
+  const avatarSrc = user?.photo || "/profile.jpeg";
 
   return (
-    <div className="min-h-screen bg-[#FFF8F4] font-sans flex items-center justify-center pb-20">
-      <div className="w-full max-w-4xl mx-auto px-6 w-full">
-        <div className="flex flex-col md:flex-row items-stretch gap-8">
+    <div className="min-h-screen bg-[#FFF8F4] flex flex-col items-center pt-24 px-4 pb-12">
+      <div className="w-full max-w-4xl bg-white rounded-[1.5rem] shadow-sm border border-[#DBC9C4] p-8 md:p-12">
+        <div className="flex flex-col md:flex-row gap-12 items-start">
           
-          {/* Left panel */}
-          <div className="md:w-1/3 bg-white border border-[#E7D7D1] shadow-sm rounded-[2rem] p-10 flex flex-col items-center justify-center text-center">
-            {/* Avatar */}
-            <div
-              className="relative w-40 h-40 rounded-[2rem] bg-[#F9F0E8] mb-6 overflow-hidden shadow-sm cursor-pointer group border-4 border-[#F5EBE3]"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Image
-                src={avatarPreview || "/profile.jpeg"}
-                alt="avatar"
-                fill
-                className="object-cover"
-                onError={(e) => { e.target.src = "/profile.jpeg" }}
-              />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                <Camera className="w-8 h-8 text-white" />
-              </div>
+          {/* Left panel (Avatar) */}
+          <div className="flex flex-col items-center w-full md:w-1/3">
+            <div className="w-40 h-40 rounded-full border-[6px] border-[#FFF8F4] shadow-md overflow-hidden mb-5 bg-[#DBC9C4]">
+              <Image src={avatarSrc} alt="avatar" width={160} height={160} className="w-full h-full object-cover" />
             </div>
-
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-
-            <h2 className="text-3xl font-bold text-[#221A13] mb-2">{formData.name}</h2>
-            <p className="text-sm font-medium text-[#854C4A] bg-[#F9F0E8] px-4 py-1.5 rounded-full">{user.email}</p>
+            <h2 className="text-2xl font-bold text-[#221A13] font-serif mb-2 text-center">{name || "User"}</h2>
+            <p className="text-xs text-[#854C4A] bg-[#FFF8F4] px-4 py-1.5 rounded-full font-semibold uppercase tracking-widest border border-[#DBC9C4]">{user?.role === 'admin' ? "Admin" : "User"}</p>
           </div>
 
-          {/* Right white card */}
-          <div className="md:w-2/3 bg-white rounded-[2rem] shadow-sm p-10 border border-[#E7D7D1]">
-            <h1 className="text-3xl font-bold mb-2 text-[#221A13]">Pengaturan Profil</h1>
-            <p className="text-base text-[#6E5B42] mb-10">Kelola informasi pribadi dan preferensi akun Anda.</p>
+          {/* Right form */}
+          <div className="w-full md:w-2/3">
+            <h1 className="text-[2.2rem] font-bold font-serif text-[#221A13] mb-2">Pengaturan Profil</h1>
+            <p className="text-[#524342] text-sm mb-10">Kelola informasi pribadi Anda dan detail akun</p>
 
-            <form onSubmit={handleSave} className="space-y-7">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                <div>
-                  <label className="block text-sm font-bold text-[#854C4A] uppercase tracking-wide mb-2">Nama Lengkap</label>
-                  <input name="name" value={formData.name} onChange={handleInputChange} className="w-full bg-[#FFFBF9] border border-[#E7D7D1] rounded-xl px-5 py-3.5 text-[#221A13] font-medium focus:outline-none focus:ring-2 focus:ring-[#854C4A]/30 focus:border-[#854C4A] transition-colors" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#854C4A] uppercase tracking-wide mb-2">Email</label>
-                  <input name="email" value={formData.email} onChange={handleInputChange} className="w-full bg-[#FFFBF9] border border-[#E7D7D1] rounded-xl px-5 py-3.5 text-[#221A13] font-medium focus:outline-none focus:ring-2 focus:ring-[#854C4A]/30 focus:border-[#854C4A] transition-colors" />
-                </div>
+            <form onSubmit={handleSave} className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-[#524342] mb-2">Nama Lengkap</label>
+                <input 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  className="w-full border border-[#DBC9C4] rounded-xl px-5 py-3.5 bg-white focus:outline-none focus:border-[#854C4A] focus:ring-1 focus:ring-[#854C4A] transition text-[#221A13]" 
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                <div>
-                  <label className="block text-sm font-bold text-[#854C4A] uppercase tracking-wide mb-2">Umur</label>
-                  <input type="number" name="age" value={formData.age} onChange={handleInputChange} className="w-full bg-[#FFFBF9] border border-[#E7D7D1] rounded-xl px-5 py-3.5 text-[#221A13] font-medium focus:outline-none focus:ring-2 focus:ring-[#854C4A]/30 focus:border-[#854C4A] transition-colors" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#854C4A] uppercase tracking-wide mb-2">Gender</label>
-                  <select name="gender" value={formData.gender} onChange={handleInputChange} className="w-full bg-[#FFFBF9] border border-[#E7D7D1] rounded-xl px-5 py-3.5 text-[#221A13] font-medium focus:outline-none focus:ring-2 focus:ring-[#854C4A]/30 focus:border-[#854C4A] transition-colors cursor-pointer appearance-none">
-                    <option value="">Pilih...</option>
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-[#524342] mb-2">Alamat Email</label>
+                <input 
+                  value={email} 
+                  readOnly 
+                  className="w-full border border-[#DBC9C4] rounded-xl px-5 py-3.5 bg-[#FFF8F4] text-[#6E5B42] outline-none cursor-not-allowed" 
+                />
+                <p className="text-xs text-[#854C4A] mt-2 italic">* Email tidak dapat diubah untuk menjaga keamanan data.</p>
               </div>
 
-              <div className="mt-10 flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6">
-                <button type="button" onClick={handleLogout} className="w-full sm:w-auto text-[#C15454] bg-[#FFF2F2] hover:bg-[#FFE5E5] px-6 py-3.5 rounded-xl font-bold transition-colors">
-                  Keluar Akun
-                </button>
-                <button type="submit" disabled={saving} className="w-full sm:w-auto bg-[#854C4A] text-white px-8 py-3.5 rounded-xl shadow-md hover:bg-[#6A3937] hover:shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed font-bold text-base">
+              <div>
+                <label className="block text-sm font-semibold text-[#524342] mb-2">Nomor Telepon</label>
+                <input 
+                  value={phone} 
+                  onChange={(e) => setPhone(e.target.value)} 
+                  className="w-full border border-[#DBC9C4] rounded-xl px-5 py-3.5 bg-white focus:outline-none focus:border-[#854C4A] focus:ring-1 focus:ring-[#854C4A] transition text-[#221A13]" 
+                  placeholder="Contoh: 08123456789" 
+                />
+              </div>
+
+              <div className="pt-8 border-t border-[#DBC9C4] flex flex-wrap gap-4 mt-8">
+                <button 
+                  type="submit" 
+                  disabled={saving} 
+                  className="bg-[#854C4A] text-white px-8 py-3.5 rounded-xl shadow-sm hover:bg-[#6B3A38] disabled:opacity-50 font-semibold transition"
+                >
                   {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={handleLogout} 
+                  className="text-[#854C4A] bg-white border border-[#854C4A] px-8 py-3.5 rounded-xl hover:bg-[#FFF8F4] font-semibold transition"
+                >
+                  Keluar Akun
                 </button>
               </div>
             </form>
