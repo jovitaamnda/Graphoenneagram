@@ -9,69 +9,30 @@ const analysisSchema = new mongoose.Schema(
     },
     analysisType: {
       type: String,
-      enum: ["image", "canvas", "pdf"],
-      default: "image",
+      enum: ["image", "canvas"],
+      required: true,
     },
     imageUrl: String,
-    canvasData: String,
-
-    // --- HASIL AI (Disamakan dengan Service) ---
-    enneagramType: {
-      type: String, // Contoh: "Tipe 1"
-    },
+    canvasData: String, // Base64 encoded canvas image
     personalityType: {
-      type: String, // Contoh: "The Reformer"
+      type: String,
+      enum: [
+        "Optimist",
+        "Introvert",
+        "Creative",
+        "Analytical",
+        "Leader",
+        "Dreamer",
+      ],
     },
-    
-    // ✅ CONFIDENCE (Sudah Benar)
-    confidence: {
-      type: Number, 
-      default: 0
-    },
-
-    // ✅ TRAITS (Sudah Benar & Detail)
-    // Struktur ini cocok dengan data yang dikirim dari AnalysisService
     traits: {
-      slant: {
-        val: String,
-        meaning: String
-      },
-      size: {
-        val: String,
-        meaning: String
-      },
-      pressure: {
-        val: String,
-        meaning: String
-      },
-      baseline: {
-        val: String,
-        meaning: String
-      }
+      confidence: { type: Number, min: 0, max: 100 },
+      creativity: { type: Number, min: 0, max: 100 },
+      extraversion: { type: Number, min: 0, max: 100 },
+      analyticalMind: { type: Number, min: 0, max: 100 },
+      emotionalIntelligence: { type: Number, min: 0, max: 100 },
     },
-
     description: String,
-
-    // 🔥 TAMBAHAN BARU (WAJIB ADA) 🔥
-    // Tanpa ini, rekomendasi spesifik dari Service tidak akan tersimpan di Database
-    recommendations: {
-      type: [String], // Array berisi kalimat-kalimat rekomendasi
-      default: []
-    },
-
-    validationResults: {
-      answers: {
-        type: [Number],
-        default: []
-      },
-      triadScores: {
-        Gut: { type: Number, default: 0 },
-        Heart: { type: Number, default: 0 },
-        Head: { type: Number, default: 0 }
-      },
-      completedAt: Date
-    },
-
     status: {
       type: String,
       enum: ["pending", "completed", "failed"],

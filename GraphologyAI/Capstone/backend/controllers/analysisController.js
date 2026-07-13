@@ -1,180 +1,139 @@
-const analysisService = require("../services/analysisService");
-const pdfService = require("../services/pdfService");
-const asyncHandler = require("../utils/asyncHandler");
-const AppError = require("../utils/appError");
+const AnalysisService = require("../services/analysisService");
 
 // @route   POST /api/analysis/upload
 // @desc    Upload dan analyze image
 // @access  Private
-exports.uploadImage = asyncHandler(async (req, res, next) => {
-  const userId = req.user._id;
+exports.uploadImage = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const imageData = req.file ? req.file.path : req.body.imageData;
 
-  let imageData;
-  if (req.body.imageData && typeof req.body.imageData === 'string' && req.body.imageData.startsWith('data:image')) {
-    imageData = req.body.imageData;
-  } else {
-    imageData = req.file ? req.file.path : req.body.imageData;
+    if (!imageData || !userId) {
+      return res.status(400).json({ message: "Image data and userId required" });
+    }
+
+    const analysis = await AnalysisService.analyzeHandwriting(
+      userId,
+      imageData,
+      "image"
+    );
+
+    res.status(201).json({
+      message: "Analysis completed successfully",
+      analysis,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  if (!imageData) {
-    return next(new AppError("Image data required", 400));
-  }
-
-  const analysis = await analysisService.analyzeHandwriting(
-    userId,
-    imageData,
-    "image"
-  );
-
-  res.status(201).json({
-    message: "Analysis completed successfully",
-    analysis,
-  });
-});
-
-// @route   GET /api/analysis/:analysisId/pdf
-// @desc    Download Analysis PDF
-// @access  Private
-exports.generatePDF = asyncHandler(async (req, res, next) => {
-  const { analysisId } = req.params;
-  const analysis = await analysisService.getAnalysis(analysisId);
-
-  if (!analysis) {
-    return next(new AppError("Analysis not found", 404));
-  }
-
-  const filename = `Analysis_Result_${analysisId}.pdf`;
-  res.setHeader("Content-disposition", `attachment; filename="${filename}"`);
-  res.setHeader("Content-type", "application/pdf");
-
-  await pdfService.generateReport(analysis, res);
-});
+};
 
 // @route   POST /api/analysis/canvas
 // @desc    Analyze canvas drawing
 // @access  Private
-exports.analyzeCanvas = asyncHandler(async (req, res, next) => {
-  const userId = req.user._id;
-  const { canvasData } = req.body;
+exports.analyzeCanvas = async (req, res) => {
+  try {
+    const { userId, canvasData } = req.body;
 
-  if (!canvasData) {
-    return next(new AppError("Canvas data required", 400));
+    if (!canvasData || !userId) {
+      return res.status(400).json({ message: "Canvas data and userId required" });
+    }
+
+    const analysis = await AnalysisService.analyzeHandwriting(
+      userId,
+      canvasData,
+      "canvas"
+    );
+
+    res.status(201).json({
+      message: "Analysis completed successfully",
+      analysis,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  const analysis = await analysisService.analyzeHandwriting(
-    userId,
-    canvasData,
-    "canvas"
-  );
-
-  res.status(201).json({
-    message: "Analysis completed successfully",
-    analysis,
-  });
-});
-
-// @route   PUT /api/analysis/:analysisId/validation
-// @desc    Save questionnaire validation results for analysis
-// @access  Private
-exports.saveValidationResult = asyncHandler(async (req, res, next) => {
-  const { analysisId } = req.params;
-  const userId = req.user._id;
-  const { answers, triadScores } = req.body;
-
-  if (!answers || !Array.isArray(answers) || answers.length === 0) {
-    return next(new AppError("Answers are required", 400));
-  }
-
-  const saved = await analysisService.saveValidationResult(analysisId, userId, { answers, triadScores });
-  if (!saved) {
-    return next(new AppError("Analysis not found or unauthorized", 404));
-  }
-
-  res.status(200).json({ message: "Validation results saved successfully", analysis: saved });
-});
+};
 
 // @route   GET /api/analysis/:analysisId
 // @desc    Get single analysis result
 // @access  Private
-exports.getAnalysis = asyncHandler(async (req, res, next) => {
-  const { analysisId } = req.params;
-  const analysis = await analysisService.getAnalysis(analysisId);
+exports.getAnalysis = async (req, res) => {
+  try {
+    const { analysisId } = req.params;
 
-  if (!analysis) {
-    return next(new AppError("Analysis not found", 404));
+    const analysis = await AnalysisService.getAnalysis(analysisId);
+
+    if (!analysis) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    res.status(200).json(analysis);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  res.status(200).json(analysis);
-});
+};
 
 // @route   GET /api/analysis/history/:userId
 // @desc    Get user's analysis history
 // @access  Private
-exports.getUserHistory = asyncHandler(async (req, res, next) => {
-  const { userId } = req.params;
-  const { page = 1, limit = 10 } = req.query;
+exports.getUserHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
 
-  const history = await analysisService.getUserAnalysisHistory(
-    userId,
-    parseInt(page),
-    parseInt(limit)
-  );
+    const history = await AnalysisService.getUserAnalysisHistory(
+      userId,
+      parseInt(page),
+      parseInt(limit)
+    );
 
-  res.status(200).json(history);
-});
+    res.status(200).json(history);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // @route   DELETE /api/analysis/:analysisId
 // @desc    Delete analysis
 // @access  Private
-exports.deleteAnalysis = asyncHandler(async (req, res, next) => {
-  const { analysisId } = req.params;
+exports.deleteAnalysis = async (req, res) => {
+  try {
+    const { analysisId } = req.params;
 
-  const deleted = await analysisService.deleteAnalysis(analysisId);
-  if (!deleted) {
-    return next(new AppError("Analysis not found", 404));
+    await AnalysisService.deleteAnalysis(analysisId);
+
+    res.status(200).json({ message: "Analysis deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-
-  res.status(200).json({ message: "Analysis deleted successfully" });
-});
-
-// @route   PUT /api/analysis/:analysisId
-// @desc    Update user's analysis (admin only)
-// @access  Private/Admin
-exports.updateAnalysis = asyncHandler(async (req, res, next) => {
-  const { analysisId } = req.params;
-  const { enneagramType, confidence, personalityType } = req.body;
-
-  const updated = await analysisService.updateAnalysis(analysisId, {
-    enneagramType,
-    confidence,
-    personalityType
-  });
-
-  if (!updated) {
-    return next(new AppError("Analysis not found", 404));
-  }
-
-  res.status(200).json({ message: "Analysis updated successfully", analysis: updated });
-});
+};
 
 // @route   GET /api/admin/analyses
 // @desc    Get all analyses (admin only)
 // @access  Private/Admin
-exports.getAllAnalyses = asyncHandler(async (req, res, next) => {
-  const { page = 1, limit = 20 } = req.query;
+exports.getAllAnalyses = async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
 
-  const analyses = await analysisService.getAllAnalyses(
-    parseInt(page),
-    parseInt(limit)
-  );
+    const analyses = await AnalysisService.getAllAnalyses(
+      parseInt(page),
+      parseInt(limit)
+    );
 
-  res.status(200).json(analyses);
-});
+    res.status(200).json(analyses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // @route   GET /api/admin/analysis-stats
 // @desc    Get analysis statistics (admin only)
 // @access  Private/Admin
-exports.getStatistics = asyncHandler(async (req, res, next) => {
-  const stats = await analysisService.getStatistics();
-  res.status(200).json(stats);
-});
+exports.getStatistics = async (req, res) => {
+  try {
+    const stats = await AnalysisService.getStatistics();
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
