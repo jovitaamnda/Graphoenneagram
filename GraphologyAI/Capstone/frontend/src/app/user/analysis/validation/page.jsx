@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { analysisApi } from "@/api/analysis";
 import { enneagramDetails } from "@/constants/enneagramDetails";
@@ -67,7 +67,7 @@ const getTriadFromEnneagram = (enneagramType) => {
 
 
 
-export default function ValidationPage() {
+function ValidationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const analysisId = searchParams?.get("analysisId");
@@ -486,5 +486,13 @@ export default function ValidationPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ValidationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FFF8F4] pt-32 pb-16" />}>
+      <ValidationContent />
+    </Suspense>
   );
 }
